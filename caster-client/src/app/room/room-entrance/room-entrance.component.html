@@ -1,0 +1,14 @@
+<input name="username" placeholder="Your name" type="text" #usernameField>
+<hr>
+
+<h4>Create a new room</h4>
+<form (ngSubmit)="onCreateRoomSubmit()" >
+  <input name="roomName" placeholder="Room name" type="text" #roomNameField>
+  <button type="submit">Create</button>
+</form>
+<hr>
+
+<h4>Select a room</h4>
+<div *ngFor="let room of availableRooms">
+  <button (click)="gotoRoom(room.id)">{{room.name}}</button>
+</div>
