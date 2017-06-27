@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { RoomDataService } from './room-data.service';
 import { RoomComponent } from './room/room.component';
+import {SignalingService} from './signaling.service';
 
 @NgModule({
   imports: [
@@ -14,7 +15,8 @@ import { RoomComponent } from './room/room.component';
   ],
   declarations: [RoomEntranceComponent, RoomComponent],
   providers: [
-    RoomDataService
+    RoomDataService,
+    SignalingService
   ]
 })
 export class RoomModule { }

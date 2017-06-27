@@ -24,7 +24,7 @@ function normalizePort(val) {
 }
 
 const port = normalizePort(process.env.PORT || '5550');
-app.listen(port);
+app.bootstrap(port);
 console.log(`Listening on ${port}`);
 
 if (process.env.NODE_ENV === 'development') {

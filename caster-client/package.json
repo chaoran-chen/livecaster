@@ -4,8 +4,8 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "ng serve --ssl 1 --ssl-key ../dummy-keys/key.pem --ssl-cert ../dummy-keys/cert.pem",
+    "build": "ng build --environment prod && rm -rf ../node-server/cc-dist && mkdir ../node-server/cc-dist && cp -R dist/* ../node-server/cc-dist",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

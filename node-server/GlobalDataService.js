@@ -2,7 +2,6 @@ let instance;
 
 
 class GlobalDataService {
-
   static getInstance() {
     if (!instance) {
       instance = new GlobalDataService();
@@ -21,13 +20,18 @@ class GlobalDataService {
   }
 
 
+  getRoom(id) {
+    return this.rooms.find(room => room.id === id);
+  }
+
+
   getRooms() {
     return this.rooms;
   }
 
 
   addRoom(room) {
-    const newRoom = Object.assign({ id: this.roomIdCouter }, room);
+    const newRoom = Object.assign({ id: this.roomIdCouter, participants: [] }, room);
     this.roomIdCouter += 1;
     this.rooms.push(newRoom);
     return newRoom;

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
+import {SignalingService} from '../signaling.service';
 
 
 @Component({
@@ -7,22 +8,47 @@ import {ActivatedRoute, Router} from '@angular/router';
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
-export class RoomComponent implements OnInit {
+export class RoomComponent implements AfterViewInit {
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  @ViewChild('receivedAudio') receivedAudio: ElementRef;
+
+  constructor(private route: ActivatedRoute, private router: Router, private signalingService: SignalingService) { }
 
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.route.params.subscribe((pathParams) => {
-      this.route.queryParams.subscribe((queryParams) => {
+      this.route.queryParams.subscribe(async (queryParams) => {
         const id = pathParams.rid;
         const username = queryParams.username;
         if (!username) {
           return this.router.navigateByUrl('/');
         }
-        // Start doing the interesting stuff
+
+        try {
+          const localStream = await navigator.mediaDevices.getUserMedia({audio: true});
+          this.signalingService.init(username, this.receivedAudio, id, localStream);
+        } catch (err) {
+          this.handleGetUserMediaError(err);
+        }
       });
     });
+  }
+
+  handleGetUserMediaError(err) {
+    console.log('handleGetUserMediaError', err);
+    switch (err.name) {
+      case 'NotFoundError':
+        alert('Unable to open your call because no camera and/or microphone' +
+          'were found.');
+        break;
+      case 'SecurityError':
+      case 'PermissionDeniedError':
+        // Do nothing; this is the same as the user canceling the call.
+        break;
+      default:
+        alert('Error opening your camera and/or microphone: ' + err.message);
+        break;
+    }
   }
 
 }
