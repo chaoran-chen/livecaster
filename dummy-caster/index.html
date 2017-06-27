@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dummy Audio Pusher</title>
+</head>
+<body>
+
+
+<script type="text/javascript">
+  const socket = new WebSocket('ws://localhost:5552');
+  socket.addEventListener('open', async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const mediaRecorder = new MediaRecorder(stream, {
+      audioBitsPerSecond: 64000
+    });
+    mediaRecorder.ondataavailable = (event) => {
+      socket.send(new Blob([event.data], { 'type' : 'audio/webm; codecs=opus' }));
+    };
+    mediaRecorder.start(500); // A blob every 500 ms.
+  });
+</script>
+</body>
+</html>
