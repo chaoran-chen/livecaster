@@ -6,48 +6,134 @@ const router = express.Router();
 const dataService = GlobalDataService.getInstance();
 
 
-function sendToAllExcept(participants, exception, content) {
-  participants.forEach(({ username, socket }) => {
-    if (username !== exception) {
-      socket.send(JSON.stringify(content));
+const clientStates = {
+  READY: 0,
+};
+
+
+class SignalingService {
+
+  static broadcastMessage(socket, msg) {
+    if (socket.state !== clientStates.READY) {
+      console.error('Invalid current client state, expected ', clientStates.READY, ' got ', socket.state);
+      return;
     }
-  });
-}
+
+    SignalingService.sendToAllExcept(socket.room, socket.participant.id, msg);
+  }
 
 
-router.ws('/', (ws) => {
-  ws.on('message', (msgStr) => {
-    const msg = JSON.parse(msgStr);
-    console.log('Message received', msg);
+  static redirectMessage(socket, msg) {
+    SignalingService.sendTo(dataService.getParticipant(msg.target), msg);
+  }
 
-    if (util.isNullOrUndefined(msg.type) || util.isNullOrUndefined(msg.room) || util.isNullOrUndefined(msg.username)) {
+
+  static registerParticipant(socket, msg) {
+    if (util.isNullOrUndefined(msg.room)) {
       console.error('Invalid message received');
       return;
     }
-    const room = dataService.getRoom(Number.parseInt(msg.room, 10));
+    const room = dataService.getRoom(msg.room);
     if (!room) {
       console.error('Room not available');
+      socket.send(JSON.stringify({
+        type: 'room-not-available',
+      }));
       return;
     }
 
+    const participant = dataService.addParticipant(room.id, socket);
+    socket.state = clientStates.READY;
+    socket.room = room;
+    socket.participant = participant;
+
+    SignalingService.sendTo(participant, {
+      type: 'registration-successful',
+      participantId: participant.id,
+    });
+
+    SignalingService.sendToAllExcept(room, participant.id, {
+      type: 'participant-joined',
+      participantId: participant.id,
+      name: participant.name,
+    });
+
+    socket.room.participants.forEach((participantId) => {
+      const participantName = dataService.getParticipant(participantId).name;
+      if (participantId !== participant.id) {
+        SignalingService.sendTo(participant, {
+          type: 'participant-joined',
+          participantId,
+          name: participantName,
+        });
+      }
+    });
+  }
+
+
+  static sendTo(participant, content) {
+    participant.socket.send(JSON.stringify(content));
+  }
+
+
+  static sendToAll(room, content) {
+    room.participants.forEach((participantId) => {
+      SignalingService.sendTo(dataService.getParticipant(participantId), content);
+    });
+  }
+
+
+  static sendToAllExcept(room, exceptionParticipantId, content) {
+    room.participants.forEach((participantId) => {
+      if (participantId !== exceptionParticipantId) {
+        SignalingService.sendTo(dataService.getParticipant(participantId), content);
+      }
+    });
+  }
+}
+
+
+router.ws('/', (socket) => {
+  socket.on('close', () => {
+    if (socket.state !== clientStates.READY) {
+      return;
+    }
+    console.log('Connection closed, participant id: ', socket.participant.id);
+    dataService.removeParticipant(socket.participant);
+    SignalingService.sendToAll(socket.room, {
+      type: 'participant-leaved',
+      participantId: socket.participant.id,
+    });
+  });
+
+
+  socket.on('message', (msgStr) => {
+    const msg = JSON.parse(msgStr);
+    console.log('Message received, type:', msg.type
+      + (socket.participant ? `, Sender ID: ${socket.participant.id}` : ''));
     switch (msg.type) {
       case 'ready-to-call':
-        room.participants.push({ username: msg.username, socket: ws });
-        sendToAllExcept(room.participants, msg.username, {
-          type: 'new-participant',
-          targetUsername: msg.username,
-        });
-        room.participants.forEach(({ username }) => {
-          if (username !== msg.username) {
-            ws.send(JSON.stringify({
-              type: 'new-participant',
-              targetUsername: username,
-            }));
-          }
+        SignalingService.registerParticipant(socket, msg);
+        break;
+      case 'change-name':
+        if (socket.state !== clientStates.READY) {
+          console.error('Invalid client state');
+          break;
+        }
+        dataService.setParticipant({ id: socket.participant.id, name: msg.name });
+        SignalingService.sendToAllExcept(socket.room, socket.participant.id, {
+          type: 'participant-name-changed',
+          participantId: socket.participant.id,
+          name: msg.name,
         });
         break;
       default:
-        sendToAllExcept(room.participants, msg.username, msg);
+        msg.sender = socket.participant.id;
+        if (msg.target) {
+          SignalingService.redirectMessage(socket, msg);
+        } else {
+          SignalingService.broadcastMessage(socket, msg);
+        }
         break;
     }
   });

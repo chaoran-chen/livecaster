@@ -11,15 +11,16 @@ router.get('/', (req, res) => {
 
 
 router.get('/rooms', (req, res) => {
-  res.json(dataService.getRooms().map(({ id, name }) => ({ id, name })));
+  res.json(dataService.getRooms().map(({ id, name, participants }) => ({
+    id,
+    name,
+    numberParticipants: participants.length,
+  })));
 });
 
 
 router.post('/rooms', (req, res) => {
-  console.log(req.body);
-  const created = dataService.addRoom({
-    name: req.body.name,
-  });
+  const created = dataService.addRoom();
   res.json(created);
 });
 

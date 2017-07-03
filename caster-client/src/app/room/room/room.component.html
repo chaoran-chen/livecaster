@@ -1,5 +1,33 @@
-<audio id="received-audio" #receivedAudio autoplay></audio>
+<audio
+  *ngFor="let target of targetArray"
+  id="stream-{{target.participantId}}"
+  autoplay
+></audio>
 
-<p>
-  room works!
-</p>
+<div class="container">
+  <div class="main">
+    <h1>Unnamed Room</h1>
+    <div>
+      <md-input-container class="room-url-field">
+        <input mdInput value="{{window.location.href}}" onclick="this.select()" readonly>
+        <md-placeholder class="input-placeholder">Invite other casters</md-placeholder>
+      </md-input-container>
+    </div>
+  </div>
+
+  <div class="casters-block">
+    <div class="caster caster--me">
+      <img src="/assets/images/user_female.png" class="caster__image" />
+      <md-input-container>
+        <input mdInput (change)="nameChanged($event)">
+        <md-placeholder class="input-placeholder">Your name</md-placeholder>
+      </md-input-container>
+    </div>
+
+    <div class="caster" *ngFor="let target of targetArray">
+      <img src="/assets/images/user_female.png" class="caster__image" />
+      <div>[{{target.participantId}}] {{target.name || 'Anonymous'}}</div>
+    </div>
+
+  </div>
+</div>

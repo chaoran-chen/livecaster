@@ -5,18 +5,20 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { RoomDataService } from './room-data.service';
 import { RoomComponent } from './room/room.component';
-import {SignalingService} from './signaling.service';
+import { MdButtonModule, MdInputModule } from '@angular/material';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    MdButtonModule,
+    MdInputModule
   ],
   declarations: [RoomEntranceComponent, RoomComponent],
   providers: [
-    RoomDataService,
-    SignalingService
+    RoomDataService
   ]
 })
-export class RoomModule { }
+export class RoomModule {
+}

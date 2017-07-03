@@ -27,13 +27,10 @@ export class RoomDataService {
   }
 
 
-  async createRoom(name: string) {
+  async createRoom() {
     const res = await fetch(`${RoomDataService.getUrl()}/rooms`, {
       headers: this.getHeaders(),
-      method: 'POST',
-      body: JSON.stringify({
-        name
-      })
+      method: 'POST'
     });
     const created = await res.json();
     console.log(created);

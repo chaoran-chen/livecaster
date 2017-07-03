@@ -1,0 +1,29 @@
+.container {
+  min-height: 100vh;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: white;
+  border: 1px solid darkgray;
+  box-shadow: 5px 0 4px 0 rgba(0,0,0,0.75), -5px 0 2px 0 rgba(0,0,0,0.75);
+}
+
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  a, a:hover, a:focus, a:active {
+    font-weight: bold;
+    font-size: larger;
+    color: white;
+    text-decoration: none;
+  }
+}
+
+
+.main {
+  margin-top: 15px;
+  padding: 10px 15px;
+}

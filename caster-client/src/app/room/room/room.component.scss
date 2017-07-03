@@ -1,0 +1,46 @@
+.container {
+  display: flex;
+
+  & > * {
+    padding: 0 7px;
+  }
+}
+
+
+.main {
+  flex-grow: 1;
+}
+
+
+.room-url-field {
+  width: 100%;
+}
+
+
+.casters-block {
+  width: 150px;
+}
+
+
+.caster {
+  margin-bottom: 25px;
+  text-align: center;
+
+  &--me {
+    margin-bottom: 10px;
+
+    .caster__image {
+      margin-bottom: 8px;
+    }
+  }
+}
+
+
+.caster__image {
+  width: 70px;
+}
+
+
+.input-placeholder {
+  font-variant: small-caps;
+}
