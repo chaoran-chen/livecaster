@@ -17,6 +17,9 @@ interface Target {
 }
 
 
+declare const MediaRecorder: any;
+
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
@@ -63,7 +66,8 @@ export class RoomComponent implements AfterViewInit {
 
       try {
         const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.init(id, localStream);
+        this.initWebRTC(id, localStream);
+        this.initPushToServer(id, localStream);
       } catch (err) {
         this.handleGetUserMediaError(err);
       }
@@ -89,7 +93,23 @@ export class RoomComponent implements AfterViewInit {
   }
 
 
-  init(roomId, localStream) {
+  initPushToServer(roomId, localStream) {
+    // TODO Select room
+    // TODO URL
+    const socket = new WebSocket('wss://localhost:5552');
+    socket.addEventListener('open', async () => {
+      const mediaRecorder = new MediaRecorder(localStream, {
+        audioBitsPerSecond: 64000
+      });
+      mediaRecorder.ondataavailable = (event) => {
+        socket.send(new Blob([event.data], { 'type' : 'audio/webm; codecs=opus' }));
+      };
+      mediaRecorder.start(500); // A blob every 500 ms.
+    });
+  }
+
+
+  initWebRTC(roomId, localStream) {
     this.roomId = roomId;
     this.localStream = localStream;
     this.socket = new WebSocket(RoomComponent.getUrl());
