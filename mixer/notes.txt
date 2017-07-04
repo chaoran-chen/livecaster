@@ -1,0 +1,24 @@
+
+libopus
+	not easy to compile (under windows)
+	thers a binary distribution of libopusfile which contains a libopus.dll (yay)
+	got it to link
+	setting up websockets was easy with qt
+	got a tiny dummy client to connect with mixer
+	works, getting data
+	decode of libopus failes, let try different parameters (frequency etc)
+	trying firefox instead of chrome, maybe that'll help...  nope
+	looking at several examples for using the data that the js MediaRecorder provides
+	trying several mime types for both chrome and firefox ... this doesn't help
+	changed mixer to just save every binary websocket message as a .opus file, now trying to play it back using several audio players (vlc, foobar)
+	audio players also not working, is what we are receiving actually valid audio data?!
+	now trying to convert the .opus file using ffmpeg... holy smokes this works, the output .wav filed can be played back and contain audio from the mic
+	realization: the data that is sent are not raw opus frames, but actually opus within a webm container or ogg container for firefox
+	we'll need ffmpeg libs to handle that
+
+ffmpeg
+	oh boy, the ffmpeg libs have a huge api... and the documentation is, ehm, not so great
+	ok, we need to get a handle to the format, then use that format to build some sort of converter stream i guess. This is gonna take some time...
+	ffmpeg is built to handle files, but we have our data in memory. So we need to build a custom AVIOContext that reads data from memory. Great...
+	custom AVIOContext works! We even have autodetection of the input format, neat! No lets try to convert to wav/pcm
+	

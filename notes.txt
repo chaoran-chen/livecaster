@@ -1,0 +1,21 @@
+
+
+caster application
+	webrtc between casters
+	websocket to mixer for uploading audio
+	nodejs server as backend
+
+
+
+server mixer 
+	accept websocket connection
+	mix audiostreams from websocket into single stream
+	save as dash compatible audio files
+	dash stream server
+
+
+
+
+listener
+	listen to dash stream
+
