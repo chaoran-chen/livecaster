@@ -8,7 +8,7 @@ class AVIOContext;
 class QByteArrayAVIO
 {
 public:
-    QByteArrayAVIO(const QByteArray &data);
+    QByteArrayAVIO();
     ~QByteArrayAVIO();
 
     QByteArrayAVIO(const QByteArrayAVIO &) = delete;
@@ -16,14 +16,15 @@ public:
 
     AVIOContext *getCtx() const;
 
+    void feed(const QByteArray &data);
+    int available() const;
+
 private:
     static int read(void *opaque, unsigned char *buf, int buf_size);
-    static int64_t seek(void *opaque, int64_t offset, int whence);
 
-    const QByteArray &data_;
+    QByteArray data_;
     unsigned char* buffer_;
     AVIOContext *ctx_;
-    size_t pos_ = 0;
 };
 
 #endif // QBYTEARRAYAVIO_H

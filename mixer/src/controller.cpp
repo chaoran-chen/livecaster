@@ -1,9 +1,7 @@
 #include "controller.h"
-#include "audiodecoder.h"
+#include "casterconnection.h"
 
 #include <QWebSocket>
-#include <QDateTime>
-#include <QFile>
 
 Controller::Controller(QObject *parent) : QObject(parent),
     server_("localhost", QWebSocketServer::NonSecureMode, this)
@@ -15,10 +13,7 @@ Controller::Controller(QObject *parent) : QObject(parent),
 
 void Controller::onNewConnection()
 {
-    auto socket = server_.nextPendingConnection();
     qDebug() << "got new connection";
-
-    connect(socket, &QWebSocket::binaryMessageReceived, [=] (const QByteArray &message) {
-        qDebug() << "got message with" << message.size() << "bytes";
-    });
+    auto socket = server_.nextPendingConnection();
+    new CasterConnection(socket, this);
 }

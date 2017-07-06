@@ -20,10 +20,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp \
     controller.cpp \
     qbytearrayavio.cpp \
-    audiodecoder.cpp
+    audiodecoder.cpp \
+    casterconnection.cpp
 
 
 HEADERS += \
     controller.h \
     qbytearrayavio.h \
-    audiodecoder.h
+    audiodecoder.h \
+    casterconnection.h
