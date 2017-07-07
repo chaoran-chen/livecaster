@@ -1,6 +1,7 @@
 /* eslint-disable global-require */
 const express = require('express');
 const fs = require('fs');
+const http = require('http');
 const https = require('https');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
@@ -9,12 +10,30 @@ const errorhandler = require('errorhandler');
 const expressWs = require('express-ws');
 
 
-function bootstrap(port) {
+/**
+ *
+ * @param httpsPort
+ * @param [httpPort] - If the httpPort is not defined, only the https server will be started.
+ */
+function bootstrap(httpsPort, httpPort) {
   const privateKey = fs.readFileSync('../dummy-keys/key.pem', 'utf8');
   const certificate = fs.readFileSync('../dummy-keys/cert.pem', 'utf8');
 
   const app = express();
   const server = https.createServer({ key: privateKey, cert: certificate }, app);
+
+  // Redirect from http to https
+  if (httpPort) {
+    http.createServer(app).listen(httpPort);
+    const redirectIfHttp = (req, res, next) => {
+      if (req.secure) {
+        return next();
+      }
+      return res.redirect(`https://${req.hostname}${httpsPort === 443 ? '' : `:${httpsPort}`}${req.url}`);
+    };
+    app.all('*', redirectIfHttp);
+  }
+
   expressWs(app, server);
 
   app.use(logger('dev'));
@@ -50,7 +69,7 @@ function bootstrap(port) {
     });
   }
 
-  server.listen(port);
+  server.listen(httpsPort);
 }
 
 
