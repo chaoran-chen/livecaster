@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const errorhandler = require('errorhandler');
 const expressWs = require('express-ws');
+const path = require('path');
 
 
 /**
@@ -57,7 +58,7 @@ function bootstrap(httpsPort, httpPort) {
 
 
   app.use((req, res) => {
-    res.status(404).json({ message: 'Resource not found.' });
+    res.sendFile(path.join(__dirname, '/cc-dist/index.html'));
   });
 
   if (process.env.NODE_ENV === 'development') {
