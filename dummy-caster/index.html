@@ -8,14 +8,33 @@
 
 
 <script type="text/javascript">
-  const socket = new WebSocket('ws://localhost:5552');
+  function stringToBuffer(str, uint8array, offset) {
+    for (let i = 0; i < str.length; i++) {
+      uint8array[offset++] = str.charCodeAt(i);
+    }
+    uint8array[offset++] = 0;
+    return offset;
+  }
+
+  const socket = new WebSocket('wss://localhost:5550/signaling');
+  let first = true;
   socket.addEventListener('open', async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream, {
       audioBitsPerSecond: 64000
     });
     mediaRecorder.ondataavailable = (event) => {
-      socket.send(new Blob([event.data], { 'type' : 'audio/webm; codecs=opus' }));
+      if (first) {
+        const timestamp = new Date().toISOString();
+        const dummyRoomIdString = (42).toString();
+        const buffer = new Uint8Array(timestamp.length + dummyRoomIdString.length + 2);
+        const offset = stringToBuffer(timestamp, buffer, 0);
+        stringToBuffer(dummyRoomIdString, buffer, offset);
+        socket.send(new Blob([buffer, event.data], { 'type': 'audio/webm; codecs=opus' }));
+        first = false;
+      } else {
+        socket.send(new Blob([event.data], { 'type': 'audio/webm; codecs=opus' }));
+      }
     };
     mediaRecorder.start(500); // A blob every 500 ms.
   });

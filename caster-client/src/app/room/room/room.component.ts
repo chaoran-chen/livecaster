@@ -31,6 +31,7 @@ export class RoomComponent implements AfterViewInit {
   window = window;
 
   private roomId;
+  private firstPackage = true;
 
   // Current user
   private participantId: number;
@@ -53,6 +54,15 @@ export class RoomComponent implements AfterViewInit {
       host = environment.nodeServerHost;
     }
     return `wss://${host}/signaling`;
+  }
+
+
+  static stringToBuffer(str, uint8array, offset) {
+    for (let i = 0; i < str.length; i++) {
+      uint8array[offset++] = str.charCodeAt(i);
+    }
+    uint8array[offset++] = 0;
+    return offset;
   }
 
 
@@ -102,7 +112,18 @@ export class RoomComponent implements AfterViewInit {
         audioBitsPerSecond: 64000
       });
       mediaRecorder.ondataavailable = (event) => {
-        socket.send(new Blob([event.data], { 'type' : 'audio/webm; codecs=opus' }));
+        if (this.firstPackage) {
+          // Send an ISO timestamp and time room number in the first package.
+          const timestamp = new Date().toISOString();
+          const roomIdString = roomId.toString();
+          const buffer = new Uint8Array(timestamp.length + roomIdString.length + 2);
+          const offset = RoomComponent.stringToBuffer(timestamp, buffer, 0);
+          RoomComponent.stringToBuffer(roomIdString, buffer, offset);
+          socket.send(new Blob([buffer, event.data], { 'type': 'audio/webm; codecs=opus' }));
+          this.firstPackage = false;
+        } else {
+          socket.send(new Blob([event.data], { 'type': 'audio/webm; codecs=opus' }));
+        }
       };
       mediaRecorder.start(500); // A blob every 500 ms.
     });
