@@ -167,10 +167,9 @@ export class RoomComponent implements AfterViewInit {
     const peerConnection = new RTCPeerConnection({
       iceServers: [
         {
-          urls: [
-            'stun:stun.l.google.com:19302',
-            'stun:stun1.l.google.com:19302'
-          ]
+          urls: ['turn:livecaster.stream:5555'],
+          credential: 'livecaster',
+          username: 'myturnserver'
         }
       ]
     });
