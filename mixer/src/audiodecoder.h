@@ -3,7 +3,8 @@
 
 #include <QByteArray>
 #include <QVector>
-#include "qbytearrayavio.h"
+#include "avioreadadapter.h"
+#include "common.h"
 
 class AVFormatContext;
 class AVFrame;
@@ -18,8 +19,11 @@ public:
     ~AudioDecoder();
 
     // auto detects the format of encoded data and converts it to raw audio samples
-    QVector<double> decode(const QByteArray &encodedData);
+    SampleBuffer decode(const QByteArray &encodedData);
     void setOutputSampleRate(int sampleRate);
+    int outputSampleRate() const;
+
+    void printDetectedFormat();
 
 private:
     const char* errorString(int errNum);
@@ -30,13 +34,11 @@ private:
     SwrContext *swrCtx_;
     AVPacket *packet_;
 
-    QByteArrayAVIO avio_;
-    QVector<double> pcmBuffer_;
+    AvioReadAdapter avio_;
+    SampleBuffer pcmBuffer_;
     int outSampleRate_ = 48000;
     bool isOpen_ = false;
     char* errorBuffer_ = nullptr;
-
-    int test_ = 0;
 };
 
 #endif // AUDIODECODER_H

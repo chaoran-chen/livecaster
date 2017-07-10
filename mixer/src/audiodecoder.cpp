@@ -10,7 +10,7 @@ extern "C" {
 
 #include <QDebug>
 
-#include "qbytearrayavio.h"
+#include "avioreadadapter.h"
 
 AudioDecoder::AudioDecoder()
 {
@@ -42,21 +42,20 @@ AudioDecoder::~AudioDecoder()
 }
 
 
-QVector<double> AudioDecoder::decode(const QByteArray &encodedData)
+SampleBuffer AudioDecoder::decode(const QByteArray &encodedData)
 {
-    avio_.feed(encodedData);
+    avio_.addData(encodedData);
 
     if(!isOpen_) {
-        qDebug() << "detecting input stream format";
         int ret = avformat_open_input(&formatCtx_, NULL, NULL, NULL);
         if (ret < 0) {
             qDebug() << "could not open input data:" << errorString(ret);
-            return QVector<double>();
+            return SampleBuffer();
         }
         ret = avformat_find_stream_info(formatCtx_, NULL);
         if (ret < 0) {
             qDebug() << "could not find stream information:" << errorString(ret);
-            return QVector<double>();
+            return SampleBuffer();
         }
 
         // find first mono audio stream
@@ -67,18 +66,17 @@ QVector<double> AudioDecoder::decode(const QByteArray &encodedData)
                 break;
             }
         }
-        av_dump_format(formatCtx_, 0, "QByteArray", 0);
         if(stream == nullptr) {
             qDebug() << "could not find mono audio stream, dumping format information";
             av_dump_format(formatCtx_, 0, "QByteArray", 0);
-            return QVector<double>();
+            return SampleBuffer();
         }
 
         // find & open codec
         ret = avcodec_open2(codecCtx_, avcodec_find_decoder(stream->codecpar->codec_id), NULL);
         if(ret < 0) {
             qDebug() << "failed to open decoder for audio stream:" << errorString(ret);
-            return QVector<double>();
+            return SampleBuffer();
         }
 
         // prepare resampler
@@ -89,11 +87,11 @@ QVector<double> AudioDecoder::decode(const QByteArray &encodedData)
         av_opt_set_int(swrCtx_, "in_sample_rate", codecCtx_->sample_rate, 0);
         av_opt_set_int(swrCtx_, "out_sample_rate", outSampleRate_, 0);
         av_opt_set_sample_fmt(swrCtx_, "in_sample_fmt",  codecCtx_->sample_fmt, 0);
-        av_opt_set_sample_fmt(swrCtx_, "out_sample_fmt", AV_SAMPLE_FMT_DBL,  0);
+        av_opt_set_sample_fmt(swrCtx_, "out_sample_fmt", AV_SAMPLE_FMT_FLT,  0);
         ret = swr_init(swrCtx_);
         if(!swr_is_initialized(swrCtx_)) {
             qDebug() << "resampler has not been properly initialized:" << errorString(ret);
-            return QVector<double>();
+            return SampleBuffer();
         }
         isOpen_ = true;
     }
@@ -121,7 +119,7 @@ QVector<double> AudioDecoder::decode(const QByteArray &encodedData)
                 int swrRes = swr_convert(swrCtx_, &out, outSamples, const_cast<const uint8_t**>(frame_->data), frame_->nb_samples);
                 if(swrRes < 0) {
                     qDebug() << "swr_convert error:" << swrRes;
-                    return QVector<double>();
+                    return SampleBuffer();
                 }
                 // swrRes contains the actual number of samples written to out
                 pos += swrRes;
@@ -136,6 +134,16 @@ QVector<double> AudioDecoder::decode(const QByteArray &encodedData)
 void AudioDecoder::setOutputSampleRate(int sampleRate)
 {
     outSampleRate_ = sampleRate;
+}
+
+int AudioDecoder::outputSampleRate() const
+{
+    return outSampleRate_;
+}
+
+void AudioDecoder::printDetectedFormat()
+{
+    av_dump_format(formatCtx_, 0, "QByteArray", 0);
 }
 
 const char *AudioDecoder::errorString(int errNum)
