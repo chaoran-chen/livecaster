@@ -2,7 +2,6 @@
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
-const https = require('https');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
@@ -11,30 +10,9 @@ const expressWs = require('express-ws');
 const path = require('path');
 
 
-/**
- *
- * @param httpsPort
- * @param [httpPort] - If the httpPort is not defined, only the https server will be started.
- */
-function bootstrap(httpsPort, httpPort) {
-  const privateKey = fs.readFileSync('../dummy-keys/key.pem', 'utf8');
-  const certificate = fs.readFileSync('../dummy-keys/cert.pem', 'utf8');
-
+function bootstrap(port) {
   const app = express();
-  const server = https.createServer({ key: privateKey, cert: certificate }, app);
-
-  // Redirect from http to https
-  if (httpPort) {
-    http.createServer(app).listen(httpPort);
-    const redirectIfHttp = (req, res, next) => {
-      if (req.secure) {
-        return next();
-      }
-      return res.redirect(`https://${req.hostname}${httpsPort === 443 ? '' : `:${httpsPort}`}${req.url}`);
-    };
-    app.all('*', redirectIfHttp);
-  }
-
+  const server = http.createServer(app);
   expressWs(app, server);
 
   app.use(logger('dev'));
@@ -70,7 +48,7 @@ function bootstrap(httpsPort, httpPort) {
     });
   }
 
-  server.listen(httpsPort);
+  server.listen(port);
 }
 
 

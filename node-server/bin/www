@@ -24,12 +24,8 @@ function normalizePort(val) {
 }
 
 const port = normalizePort(process.env.PORT || '5550');
-const httpPort = normalizePort(process.env.HTTP_PORT);
-app.bootstrap(port, httpPort);
-console.log(`Listening on ${port} (https)`);
-if (httpPort) {
-  console.log(`Redirects from ${httpPort} to ${port}`)
-}
+app.bootstrap(port);
+console.log(`Listening on ${port}`);
 
 if (process.env.NODE_ENV === 'development') {
   console.log('Development mode started');
