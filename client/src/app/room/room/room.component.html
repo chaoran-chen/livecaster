@@ -3,6 +3,15 @@
     <h1>Unnamed Room</h1>
     <div>
       <md-input-container class="room-url-field">
+        <input
+          mdInput
+          value="{{window.location.href.slice(0, window.location.href.indexOf('/cast'))}}"
+          onclick="this.select()"
+          readonly
+        />
+        <md-placeholder class="input-placeholder">Invite listener</md-placeholder>
+      </md-input-container>
+      <md-input-container class="room-url-field">
         <input mdInput value="{{window.location.href}}" onclick="this.select()" readonly>
         <md-placeholder class="input-placeholder">Invite other casters</md-placeholder>
       </md-input-container>

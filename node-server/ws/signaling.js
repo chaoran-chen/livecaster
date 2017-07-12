@@ -41,6 +41,13 @@ class SignalingService {
       }));
       return;
     }
+    if (room.casterKey !== msg.casterKey) {
+      console.error('Not authorized');
+      socket.send(JSON.stringify({
+        type: 'not-authorized',
+      }));
+      return;
+    }
 
     const participant = dataService.addParticipant(room.id, socket);
     socket.state = clientStates.READY;

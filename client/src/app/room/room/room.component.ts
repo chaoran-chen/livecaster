@@ -31,6 +31,7 @@ export class RoomComponent implements AfterViewInit {
   window = window;
 
   roomId;
+  casterKey;
   firstPackage = true;
 
   // Current user
@@ -72,15 +73,18 @@ export class RoomComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     this.route.params.subscribe(async (pathParams) => {
-      const id = pathParams.rid;
+      this.route.queryParams.subscribe(async (queryParams) => {
+        this.roomId = pathParams.rid;
+        this.casterKey = queryParams.casterKey;
 
-      try {
-        const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        this.initWebRTC(id, localStream);
-        this.initPushToServer(id, localStream);
-      } catch (err) {
-        this.handleGetUserMediaError(err);
-      }
+        try {
+          const localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          this.initWebRTC(this.roomId, localStream);
+          this.initPushToServer(this.roomId, localStream);
+        } catch (err) {
+          this.handleGetUserMediaError(err);
+        }
+      });
     });
   }
 
@@ -104,7 +108,6 @@ export class RoomComponent implements AfterViewInit {
 
 
   initPushToServer(roomId, localStream) {
-    // TODO Select room
     // TODO URL
     const socket = new WebSocket('wss://localhost:5552');
     socket.addEventListener('open', async () => {
@@ -131,7 +134,6 @@ export class RoomComponent implements AfterViewInit {
 
 
   initWebRTC(roomId, localStream) {
-    this.roomId = roomId;
     this.localStream = localStream;
     this.socket = new WebSocket(RoomComponent.getUrl());
     this.setMessageHandlers();
@@ -140,7 +142,8 @@ export class RoomComponent implements AfterViewInit {
       this.currentState = clientStates.CONN_OPENED;
       this.sendToServer({
         type: 'ready-to-call',
-        room: this.roomId
+        room: this.roomId,
+        casterKey: this.casterKey
       });
     });
   }
@@ -218,6 +221,12 @@ export class RoomComponent implements AfterViewInit {
     console.log('handleNewICECandidateMsg', msg);
     const candidate = new RTCIceCandidate(msg.candidate);
     this.targets.get(msg.sender).peerConnection.addIceCandidate(candidate);
+  }
+
+
+  handleNotAuthorizedMsg(message) {
+    console.log('handleNotAuthorizedMsg');
+    this.router.navigateByUrl(`/rooms/${this.roomId}`);
   }
 
 
@@ -318,6 +327,9 @@ export class RoomComponent implements AfterViewInit {
           break;
         case 'participant-name-changed':
           this.handleParticipantNameChangedMsg(message);
+          break;
+        case 'not-authorized':
+          this.handleNotAuthorizedMsg(message);
           break;
         default:
           console.error('Unknown message received', message);

@@ -1,13 +1,16 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, UrlSegment } from '@angular/router';
 import { RoomEntranceComponent } from './room/room-entrance/room-entrance.component';
 import { RoomModule } from './room/room.module';
 import { RoomComponent } from './room/room/room.component';
+import { ListenerRoomComponent } from './room/listener-room/listener-room.component';
 
 
-const routes: Routes = [
+export const routes: Routes = [
   { path: '', component: RoomEntranceComponent },
-  { path: 'rooms/:rid', component: RoomComponent },
+  { path: 'rooms/:rid/cast', component: RoomComponent },
+  { path: 'rooms/:rid', component: ListenerRoomComponent },
+  { path: '**', component: RoomEntranceComponent }
 ];
 
 @NgModule({

@@ -14,6 +14,6 @@ export class RoomEntranceComponent {
 
   async createRoom() {
     const created = await this.roomDataService.createRoom();
-    this.router.navigateByUrl(`/rooms/${created.id}`);
+    this.router.navigateByUrl(`/rooms/${created.id}/cast?casterKey=${created.casterKey}`);
   }
 }

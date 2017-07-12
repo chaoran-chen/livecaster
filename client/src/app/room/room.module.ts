@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { RoomDataService } from './room-data.service';
 import { RoomComponent } from './room/room.component';
 import { MdButtonModule, MdInputModule } from '@angular/material';
+import { ListenerRoomComponent } from './listener-room/listener-room.component';
 
 @NgModule({
   imports: [
@@ -15,7 +16,11 @@ import { MdButtonModule, MdInputModule } from '@angular/material';
     MdButtonModule,
     MdInputModule
   ],
-  declarations: [RoomEntranceComponent, RoomComponent],
+  declarations: [
+    RoomEntranceComponent,
+    RoomComponent,
+    ListenerRoomComponent
+  ],
   providers: [
     RoomDataService
   ]

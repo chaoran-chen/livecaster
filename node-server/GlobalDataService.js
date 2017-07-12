@@ -36,6 +36,7 @@ class GlobalDataService {
 
   addRoom(room) {
     let id;
+    const casterKey = randomstring.generate({ length: 5, charset: 'alphanumeric' });
     do {
       id = randomstring.generate({ length: 5, charset: 'alphanumeric' });
     } while (this.rooms.has(id));
@@ -44,6 +45,7 @@ class GlobalDataService {
     }, room, {
       participants: [],
       id,
+      casterKey,
     });
     this.rooms.set(id, newRoom);
     return newRoom;
