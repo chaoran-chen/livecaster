@@ -122,10 +122,10 @@ export class RoomComponent implements AfterViewInit {
           const buffer = new Uint8Array(timestamp.length + roomIdString.length + 2);
           const offset = RoomComponent.stringToBuffer(timestamp, buffer, 0);
           RoomComponent.stringToBuffer(roomIdString, buffer, offset);
-          socket.send(new Blob([buffer, event.data], { 'type': 'audio/webm; codecs=opus' }));
+          socket.send(new Blob([buffer, event.data]));
           this.firstPackage = false;
         } else {
-          socket.send(new Blob([event.data], { 'type': 'audio/webm; codecs=opus' }));
+          socket.send(new Blob([event.data]));
         }
       };
       mediaRecorder.start(500); // A blob every 500 ms.

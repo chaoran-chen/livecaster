@@ -30,10 +30,10 @@
         const buffer = new Uint8Array(timestamp.length + dummyRoomIdString.length + 2);
         const offset = stringToBuffer(timestamp, buffer, 0);
         stringToBuffer(dummyRoomIdString, buffer, offset);
-        socket.send(new Blob([buffer, event.data], { 'type': 'audio/webm; codecs=opus' }));
+        socket.send(new Blob([buffer, event.data]));
         first = false;
       } else {
-        socket.send(new Blob([event.data], { 'type': 'audio/webm; codecs=opus' }));
+        socket.send(new Blob([event.data]));
       }
     };
     mediaRecorder.start(500); // A blob every 500 ms.
