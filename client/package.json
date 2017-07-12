@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --environment prod && rm -rf ../node-server/client-dist && mkdir ../node-server/client-dist && cp -R dist/* ../node-server/client-dist",
+    "build": "ng build --prod --environment prod && rm -rf ../node-server/client-dist && mkdir ../node-server/client-dist && cp -R dist/* ../node-server/client-dist",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

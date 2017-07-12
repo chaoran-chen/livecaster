@@ -30,19 +30,19 @@ export class RoomComponent implements AfterViewInit {
 
   window = window;
 
-  private roomId;
-  private firstPackage = true;
+  roomId;
+  firstPackage = true;
 
   // Current user
-  private participantId: number;
-  private name: string;
+  participantId: number;
+  name: string;
   private currentState = -1;
   private localStream: MediaStream;
 
   // Socket to the server
   private socket: WebSocket;
 
-  private targetArray: Array<Target> = [];
+  targetArray: Array<Target> = [];
   private targets: Map<number, Target> = new Map();
 
 
