@@ -30,13 +30,13 @@ function bootstrap(port) {
   const index = require('./routes/index');
   const wsSignaling = require('./ws/signaling');
 
-  app.use(express.static('cc-dist'));
+  app.use(express.static('client-dist'));
   app.use('/api', index);
   app.use('/signaling', wsSignaling);
 
 
   app.use((req, res) => {
-    res.sendFile(path.join(__dirname, '/cc-dist/index.html'));
+    res.sendFile(path.join(__dirname, '/client-dist/index.html'));
   });
 
   if (process.env.NODE_ENV === 'development') {
