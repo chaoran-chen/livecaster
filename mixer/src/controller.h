@@ -5,8 +5,17 @@
 #include <QWebSocketServer>
 #include <QHash>
 #include <QTimer>
+#include <memory>
 
 class StreamMixer;
+class DashAudioEncoder;
+
+struct CasterGroup
+{
+    int refCount_ = 0;
+    std::shared_ptr<StreamMixer> mixer = nullptr;
+    std::shared_ptr<DashAudioEncoder> encoder = nullptr;
+};
 
 class Controller : public QObject
 {
@@ -19,8 +28,7 @@ private:
     void sendMixedAudio();
 
     QWebSocketServer server_;
-    QHash<QString, StreamMixer*> groups_;
-    QHash<QString, int> groupRefCount_;
+    QHash<QString, CasterGroup> groups_;
     QTimer sendTimer_;
 };
 

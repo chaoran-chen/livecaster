@@ -23,8 +23,8 @@ SOURCES += main.cpp \
     casterconnection.cpp \
     avioreadadapter.cpp \
     aviowriteadapter.cpp \
-    audioencoder.cpp \
-    streammixer.cpp
+    streammixer.cpp \
+    dashaudioencoder.cpp
 
 
 HEADERS += \
@@ -34,5 +34,5 @@ HEADERS += \
     common.h \
     avioreadadapter.h \
     aviowriteadapter.h \
-    audioencoder.h \
-    streammixer.h
+    streammixer.h \
+    dashaudioencoder.h
