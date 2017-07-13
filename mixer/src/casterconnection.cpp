@@ -35,7 +35,7 @@ void CasterConnection::onMessage(const QByteArray &message)
 
     int pos = message.indexOf(char(0));
     QByteArray timestamp = message.mid(0, pos);
-    const QDateTime recTime = QDateTime::fromString(timestamp, Qt::ISODateWithMs);
+    const QDateTime recTime = QDateTime::fromString(timestamp, Qt::ISODate);
     pos = message.indexOf(char(0), pos + 1);
     groupId_ = message.mid(timestamp.size() + 1, pos - timestamp.size() - 1);
     groupJoined(groupId_);
