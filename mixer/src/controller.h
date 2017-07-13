@@ -6,6 +6,7 @@
 #include <QHash>
 #include <QTimer>
 #include <memory>
+#include <QCoreApplication>
 
 class StreamMixer;
 class DashAudioEncoder;
@@ -24,12 +25,15 @@ public:
     explicit Controller(QObject *parent = nullptr);
 
 private:
+    void readConfig();
     void onNewConnection();
     void sendMixedAudio();
 
     QWebSocketServer server_;
     QHash<QString, CasterGroup> groups_;
     QTimer sendTimer_;
+    QString outputBasePath_ = QCoreApplication::applicationDirPath() + "/groups/";
+    quint16 websocketPort_ = 5550;
 };
 
 #endif // CONTROLLER_H

@@ -6,6 +6,10 @@
 #include <QWebSocket>
 #include <QFile>
 #include <QDir>
+#include <QCoreApplication>
+#include <QStringList>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 static const qint64 bufferTimeMs = 1500;
 
@@ -13,12 +17,34 @@ Controller::Controller(QObject *parent) : QObject(parent),
     server_("localhost", QWebSocketServer::NonSecureMode, this),
     sendTimer_(this)
 {
+    readConfig();
 
     connect(&server_, &QWebSocketServer::newConnection, this, &Controller::onNewConnection);
-    server_.listen(QHostAddress::Any, 5550);
+    server_.listen(QHostAddress::Any, websocketPort_);
+    qDebug() << "listening for websocket connections on port" << websocketPort_;
 
     connect(&sendTimer_, &QTimer::timeout, this, &Controller::sendMixedAudio);
     sendTimer_.start(1000);
+}
+
+void Controller::readConfig()
+{
+    QFile configFile("livecaster_mixer.json");
+    if(configFile.open(QFile::ReadOnly)) {
+        QJsonParseError err;
+        QJsonDocument doc = QJsonDocument::fromJson(configFile.readAll(), &err);
+        if(err.error != QJsonParseError::NoError) {
+            qDebug() << "error parsing livecaster_mixer.json:" << err.errorString();
+            return;
+        }
+
+        QJsonObject config = doc.object();
+        websocketPort_ = config["websocket_port"].toInt(websocketPort_);
+        outputBasePath_ = config["ouput_path"].toString(outputBasePath_);
+
+    } else {
+        qDebug() << "could not find livecaster_mixer.json, using default values";
+    }
 }
 
 void Controller::onNewConnection()
@@ -41,9 +67,10 @@ void Controller::onNewConnection()
     connect(caster, &CasterConnection::groupJoined, [=] (QString groupId) {
         CasterGroup &group = groups_[groupId];
         if(group.refCount_ == 0) {
-            QDir().mkdir(groupId);
+            QString outPath = outputBasePath_ + "/" + groupId;
+            QDir().mkpath(outPath);
             group.mixer = std::make_shared<StreamMixer>((QDateTime::currentMSecsSinceEpoch() - bufferTimeMs) * 48, this);
-            group.encoder = std::make_shared<DashAudioEncoder>(groupId);
+            group.encoder = std::make_shared<DashAudioEncoder>(outPath);
             qDebug() << "opening new group with id" << groupId;
         }
         connect(caster, &CasterConnection::audioReceived,
