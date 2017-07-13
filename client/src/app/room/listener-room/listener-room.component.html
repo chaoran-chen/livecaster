@@ -2,6 +2,11 @@
   <h1>Unnamed Room</h1>
   <audio id="audioPlayer" controls></audio>
 
+  <md-input-container class="mpd-url-field">
+    <input mdInput value="{{mpdUrl}}" onclick="this.select()" readonly>
+    <md-placeholder class="input-placeholder">Open in a Dash Player</md-placeholder>
+  </md-input-container>
+
   <h2>Casters</h2>
 
 </div>

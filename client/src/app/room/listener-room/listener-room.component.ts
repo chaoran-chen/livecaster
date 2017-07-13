@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-listener-room',
@@ -9,6 +10,8 @@ import { environment } from '../../../environments/environment';
 export class ListenerRoomComponent implements OnInit, AfterViewInit {
 
   socket: WebSocket;
+  roomId;
+  mpdUrl;
 
 
   static getUrl(): string {
@@ -25,20 +28,22 @@ export class ListenerRoomComponent implements OnInit, AfterViewInit {
   }
 
 
-  constructor() { }
+  constructor(private route: ActivatedRoute) { }
 
 
   ngAfterViewInit() {
-    const { dashjs } = <any> window;
-    const url = 'http://rdmedia.bbc.co.uk/dash/ondemand/bbb/2/client_manifest-audio.mpd';
-    const player = dashjs.MediaPlayer().create();
-    console.log(player);
-    player.initialize(document.querySelector('#audioPlayer'), url, true);
-    // player.getDebug().setLogToBrowserConsole(false);
-    this.socket = new WebSocket(ListenerRoomComponent.getUrl());
-    this.socket.addEventListener('open', () => {
-      this.sendToServer({
-        type: 'hello'
+    this.route.params.subscribe(async (pathParams) => {
+      this.roomId = pathParams.rid;
+
+      const { dashjs } = <any> window;
+      this.mpdUrl = `https://livecaster.stream/dash-files/${this.roomId}/livecaster.mpd`;
+      const player = dashjs.MediaPlayer().create();
+      player.initialize(document.querySelector('#audioPlayer'), this.mpdUrl, true);
+      this.socket = new WebSocket(ListenerRoomComponent.getUrl());
+      this.socket.addEventListener('open', () => {
+        this.sendToServer({
+          type: 'hello'
+        });
       });
     });
   }
