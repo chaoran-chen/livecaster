@@ -15,7 +15,8 @@ DashAudioEncoder::DashAudioEncoder(QString path)
     av_register_all();
     errorBuffer_ = new char[1024];
 
-    int res = avformat_alloc_output_context2(&formatCtx_, NULL, "dash", NULL);
+    QByteArray filename = (path + "/livecaster.mpd").toLatin1();
+    int res = avformat_alloc_output_context2(&formatCtx_, NULL, "dash", filename.constData());
     if(res < 0) {
         qDebug() << "error creating format context:" << errorString(res);
         return;
@@ -43,13 +44,12 @@ DashAudioEncoder::DashAudioEncoder(QString path)
         codecCtx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
+    AVDictionary *dict = 0;
+    av_dict_set(&dict, "profile", "aac_low", 0);
+
     avcodec_parameters_from_context(stream_->codecpar, codecCtx_);
-
-    res = avcodec_open2(codecCtx_, codec, NULL);
+    res = avcodec_open2(codecCtx_, codec, &dict);
     checkRes(res, "avcodec_open2");
-
-    QByteArray filename = (path + "/livecaster.mpd").toLatin1();
-    memcpy(formatCtx_->filename, filename.constData(), filename.size());
 
     res = avformat_write_header(formatCtx_, NULL);
     checkRes(res, "avformat_write_header");
