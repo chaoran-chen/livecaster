@@ -11,10 +11,18 @@ router.get('/', (req, res) => {
 
 
 router.get('/rooms', (req, res) => {
-  res.json(dataService.getRooms().map(({ id, name, participants }) => ({
+  res.json(dataService.getRooms().map(({ id, name, participants, listeners }) => ({
     id,
     name,
     numberParticipants: participants.length,
+    numberListeners: listeners.length,
+    participants: participants.map((participantId) => {
+      const { id, name } = dataService.getParticipant(participantId);
+      return {
+        id,
+        name
+      };
+    })
   })));
 });
 

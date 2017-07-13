@@ -29,10 +29,12 @@ function bootstrap(port) {
 
   const index = require('./routes/index');
   const wsSignaling = require('./ws/signaling');
+  const wsListener = require('./ws/listener');
 
   app.use(express.static('client-dist'));
   app.use('/api', index);
   app.use('/signaling', wsSignaling);
+  app.use('/listener', wsListener);
 
 
   app.use((req, res) => {

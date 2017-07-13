@@ -44,6 +44,7 @@ class GlobalDataService {
       name: '',
     }, room, {
       participants: [],
+      listeners: [],
       id,
       casterKey,
     });
