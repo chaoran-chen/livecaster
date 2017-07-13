@@ -3,7 +3,7 @@ QT -= gui
 
 CONFIG += c++11
 
-TARGET = mixer
+TARGET = livecaster_mixer
 CONFIG += console
 CONFIG -= app_bundle
 
