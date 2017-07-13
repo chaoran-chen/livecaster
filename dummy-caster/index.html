@@ -16,7 +16,7 @@
     return offset;
   }
 
-  const socket = new WebSocket('ws://localhost:5550/signaling');
+  const socket = new WebSocket('ws://livecaster.stream:5559');
   let first = true;
   socket.addEventListener('open', async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

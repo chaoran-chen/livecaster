@@ -108,8 +108,7 @@ export class RoomComponent implements AfterViewInit {
 
 
   initPushToServer(roomId, localStream) {
-    // TODO URL
-    const socket = new WebSocket('wss://localhost:5552');
+    const socket = new WebSocket('wss://livecaster.stream:5552');
     socket.addEventListener('open', async () => {
       const mediaRecorder = new MediaRecorder(localStream, {
         audioBitsPerSecond: 64000
