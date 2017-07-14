@@ -22,7 +22,7 @@ DashAudioEncoder::DashAudioEncoder(QString path)
         return;
     }
 
-    AVCodec *codec = avcodec_find_encoder(AV_CODEC_ID_MP3);
+    AVCodec *codec = avcodec_find_encoder(formatCtx_->oformat->audio_codec);
     if(codec == nullptr) {
         qDebug() << "could not find codec" << codec;
         return;
@@ -44,11 +44,11 @@ DashAudioEncoder::DashAudioEncoder(QString path)
         codecCtx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-//    AVDictionary *dict = 0;
-//    av_dict_set(&dict, "profile", "aac_low", 0);
+    AVDictionary *dict = 0;
+    av_dict_set(&dict, "profile", "aac_low", 0);
 
     avcodec_parameters_from_context(stream_->codecpar, codecCtx_);
-    res = avcodec_open2(codecCtx_, codec, NULL);
+    res = avcodec_open2(codecCtx_, codec, &dict);
     checkRes(res, "avcodec_open2");
 
     res = avformat_write_header(formatCtx_, NULL);
